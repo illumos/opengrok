@@ -169,11 +169,14 @@ public class IndexDatabase {
             }
         }
 
+        if (!env.isUsingLuceneLocking()) {
+            FSDirectory.setDisableLocks(true);
+        }
         indexDirectory = FSDirectory.getDirectory(indexDir);
         spellDirectory = FSDirectory.getDirectory(spellDir);
         ignoredNames = env.getIgnoredNames();
         analyzerGuru = new AnalyzerGuru();
-        if (RuntimeEnvironment.getInstance().isGenerateHtml()) {
+        if (env.isGenerateHtml()) {
             xrefDir = new File(env.getDataRootFile(), "xref");
         }
         listeners = new ArrayList<IndexChangedListener>();
@@ -188,8 +191,14 @@ public class IndexDatabase {
      * the specified directories.
      * 
      * @param dir The directory to scan
+     * @return <code>true</code> if the file is added, false oth
      */
     public boolean addDirectory(String dir) {
+        if (dir.startsWith("\\")) {
+            dir.replace('\\', '/');
+        } else if (!dir.startsWith("/")) {
+            dir = "/" + dir;
+        }
         File file = new File(RuntimeEnvironment.getInstance().getSourceRootFile(), dir);
         if (!file.exists()) {
             return false;

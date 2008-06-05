@@ -106,10 +106,6 @@ public class Indexer {
                 getopt.reset();                
                 while ((cmd = getopt.getOpt()) != -1) {
                     switch (cmd) {
-                    case 'l':
-                        listFiles = true;
-                        runIndex = false;
-                        break;
                     case 't':
                         createDict = true;
                         runIndex = false;
@@ -260,6 +256,17 @@ public class Indexer {
                             System.exit(1);
                         }
                         break;
+                    case 'l' : 
+                        if (getopt.getOptarg().equalsIgnoreCase("on")) {
+                            env.setUsingLuceneLocking(true);
+                        } else if (getopt.getOptarg().equalsIgnoreCase("off")) {
+                            env.setUsingLuceneLocking(false);
+                        } else {
+                            System.err.println("ERROR: You should pass either \"on\" or \"off\" as argument to -l");
+                            System.err.println("       Ex: \"-l on\" will enable locks in Lucene");
+                            System.err.println("           \"-l off\" will disable locks in Lucene");
+                        }  
+                        break;
                     case '?':
                         System.err.println(cmdOptions.getUsage());
                         System.exit(0);
@@ -403,10 +410,15 @@ public class Indexer {
                     
                     for (String path : subFiles) {
                         Project project = Project.getProject(path);
-                        if (project == null) {
+                        if (project == null && env.hasProjects()) {
                             System.err.println("Warning: Could not find a project for \"" + path + "\"");
                         } else {
-                            IndexDatabase db = new IndexDatabase(project);
+                            IndexDatabase db;
+                            if (project != null) {
+                                db = new IndexDatabase(project);
+                            } else {
+                                db = new IndexDatabase();                                
+                            }
                             int idx = dbs.indexOf(db);
                             if (idx != -1) {
                                 db = dbs.get(idx);
