@@ -72,7 +72,7 @@ Usage()
 
     exec >&2
     echo ""
-    echo "Usage: ${progname} <deploy|derby|update|updateQuietly|usage>"
+    echo "Usage: ${progname} <deploy|derby|update|updateQuietly|usage|help>"
     echo "       ${progname} index [<directory>]"
     echo ""
     echo "  Optional environment variables:"
@@ -883,11 +883,10 @@ case "${1}" in
         UpdateDescriptionCache
         ;;
 
-    usage)
+    usage|help)
         OpenGrokUsage
         Usage
         ;;
-
     *)
         Usage
         ;;
